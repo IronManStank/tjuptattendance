@@ -12,7 +12,7 @@ const HELP_TEMPLATE: &str = "\
     arg_required_else_help = false,
     before_long_help = "\
 tjuptatt 仅作为学习交流之用，禁止一切违法违规用途！
-TJUPT规则详情：https://tjupt.org/rules.php
+TJUPT规则详见：https://tjupt.org/rules.php
 
 查看 https://github.com/azureqaq/tjuptattendance 来获取更多信息，
 如果你有任何问题或建议欢迎 Issue/PR")]
@@ -20,19 +20,25 @@ TJUPT规则详情：https://tjupt.org/rules.php
     ArgGroup::new("setup")
         .required(false)
         .args(["install", "uninstall"])
-        .conflicts_with_all(["profile", "temp"])
+        .conflicts_with_all(["profile", "temp", "general"])
 ))]
 #[command(group(
     ArgGroup::new("profile")
         .multiple(true)
         .required(false)
-        .args(["force"])
+        .args(["force", "top"])
 ))]
 #[command(group(
     ArgGroup::new("temp")
         .multiple(true)
         .required(false)
         .args(["user"])
+))]
+#[command(group(
+    ArgGroup::new("general")
+        .multiple(true)
+        .required(false)
+        .args(["retry"])
 ))]
 /// 一个 TJUPT <https://tjupt.org/> 签到工具.
 /// 支持：TOP10签到、邮件提醒
@@ -67,4 +73,10 @@ pub struct Cli {
     ///
     /// 即：不尝试本地记录中已完成的签到。默认关闭
     pub(crate) force: bool,
+
+    #[arg(long)]
+    /// TOP10签到模式
+    ///
+    /// 此模式必须使用配置文件
+    pub(crate) top: bool,
 }

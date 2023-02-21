@@ -8,7 +8,6 @@ pub enum Error {
     Other(#[from] anyhow::Error),
 }
 
-
 #[derive(Debug, thiserror::Error)]
 pub enum AttError {
     #[error("已达最大重试次数：[{}]", .0.join(", "))]

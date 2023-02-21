@@ -24,6 +24,7 @@ path = "tests/tests.rs"
 [dependencies]
 anyhow = "1.0"
 clap = { version = "4.1.6", features = ["derive"] }
+serde = { version = "1.0.152", features = ["derive"] }
 thiserror = "1.0"
 
 
