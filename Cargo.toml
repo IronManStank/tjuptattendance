@@ -27,6 +27,10 @@ clap = { version = "4.1.6", features = ["derive"] }
 serde = { version = "1.0.152", features = ["derive"] }
 thiserror = "1.0"
 
+[dependencies.ahash]
+version = "0.8"
+default-features = false
+features = ["std", "compile-time-rng", "serde"]
 
 [dependencies.tokio]
 version = "1.21"

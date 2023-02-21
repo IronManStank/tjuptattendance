@@ -1,4 +1,7 @@
+use anyhow::anyhow;
 use clap::{ArgGroup, Parser};
+
+use crate::{Error, User};
 
 const HELP_TEMPLATE: &str = "\
 {before-help}{name} {version}
@@ -27,6 +30,7 @@ TJUPT规则详见：https://tjupt.org/rules.php
         .multiple(true)
         .required(false)
         .args(["force", "top"])
+        .conflicts_with_all(["temp"])
 ))]
 #[command(group(
     ArgGroup::new("temp")
@@ -55,13 +59,16 @@ pub struct Cli {
     /// 注意：此操作会删掉默认配置文件和状态文件所在的文件夹
     pub(crate) uninstall: bool,
 
-    #[arg(short, long, default_value_t = String::from("username"))]
+    #[arg(short, long, value_name = "NAME=PWD")]
+    #[arg(value_parser = get_user)]
     /// 临时使用，不会产生任何本地文件
     ///
-    /// 不会保存 cookie 文件，不依赖配置文件，立即签到
-    pub(crate) user: String,
+    /// 不会保存 cookie 文件，不依赖配置文件，立即签到，
+    /// 可通过 `--user name=pwd --user name2=pwd2` 来指定多个，
+    /// 注意：此方式使用时，要求 name 中不含 '='
+    pub(crate) user: Vec<User>,
 
-    #[arg(long, short)]
+    #[arg(long, short, value_name = "NUM")]
     #[arg(value_parser = clap::value_parser!(u8).range(1..=20), default_value_t = 1)]
     /// 重试次数
     ///
@@ -79,4 +86,25 @@ pub struct Cli {
     ///
     /// 此模式必须使用配置文件
     pub(crate) top: bool,
+}
+
+impl Cli {
+    pub fn is_temp_use(&self) -> bool {
+        !self.user.is_empty()
+    }
+
+    // 根据用户名去重
+    pub fn get_users(&self) -> ahash::AHashSet<&User> {
+        ahash::AHashSet::from_iter(self.user.iter())
+    }
+}
+
+fn get_user(s: &str) -> Result<User, Error> {
+    let Some((name, pwd)) = s.split_once('=') else {
+        return Err(Error::Other(anyhow!("无法解析为 User，请按照格式输入")));
+    };
+    Ok(User {
+        name: name.into(),
+        pwd: pwd.into(),
+    })
 }
