@@ -23,9 +23,11 @@ path = "tests/tests.rs"
 
 [dependencies]
 anyhow = "1.0"
+thiserror = "1.0"
 clap = { version = "4.1.6", features = ["derive"] }
 serde = { version = "1.0.152", features = ["derive"] }
-thiserror = "1.0"
+reqwest_cookie_store = "0.5.0"
+reqwest = { version = "0.11.14", features = ["cookies", "json"] }
 
 [dependencies.ahash]
 version = "0.8"
