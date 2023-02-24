@@ -3,6 +3,11 @@ pub enum Error {
     #[error(transparent)]
     Io(#[from] std::io::Error),
     #[error(transparent)]
+    Web(#[from] reqwest::Error),
+    #[error("用户名或密码错误")]
+    /// 用户名或密码错误，基本可以排除其他因素
+    UserVerification,
+    #[error(transparent)]
     Att(#[from] AttError),
     #[error(transparent)]
     Other(#[from] anyhow::Error),

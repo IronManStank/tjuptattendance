@@ -28,6 +28,7 @@ clap = { version = "4.1.6", features = ["derive"] }
 serde = { version = "1.0.152", features = ["derive"] }
 reqwest_cookie_store = "0.5.0"
 reqwest = { version = "0.11.14", features = ["cookies", "json"] }
+lazy_static = "1.4.0"
 
 [dependencies.ahash]
 version = "0.8"

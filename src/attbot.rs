@@ -1,14 +1,28 @@
+use crate::{tjurl, Error, User};
+use anyhow::anyhow;
+use lazy_static::lazy_static;
+use reqwest::{header::HeaderMap, Client, ClientBuilder, Response};
+use reqwest_cookie_store::CookieStoreMutex;
 use std::{
     fs::File,
     path::{Path, PathBuf},
     sync::Arc,
 };
 
-use anyhow::anyhow;
-use reqwest::{Client, ClientBuilder};
-use reqwest_cookie_store::CookieStoreMutex;
-
-use crate::{Error, User};
+lazy_static! {
+    static ref HEADER: HeaderMap = {
+        let mut header = HeaderMap::new();
+        header.insert(
+            "User-Agent",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
+                    AppleWebKit/537.36 (KHTML, like Gecko) \
+                    Chrome/100.0.0.0 Safari/537.36"
+                .parse()
+                .unwrap(),
+        );
+        header
+    };
+}
 
 #[derive(Debug)]
 pub struct AttBot {
@@ -21,21 +35,12 @@ pub struct AttBot {
 
 impl AttBot {
     pub fn new(user: User, cookie_path: Option<PathBuf>) -> Self {
-        let mut header = reqwest::header::HeaderMap::new();
-        header.insert(
-            "User-Agent",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
-                    AppleWebKit/537.36 (KHTML, like Gecko) \
-                    Chrome/100.0.0.0 Safari/537.36"
-                .parse()
-                .unwrap(),
-        );
         let cookie = Arc::new(CookieStoreMutex::default());
         let client = ClientBuilder::new()
             .timeout(std::time::Duration::from_secs(30))
             .cookie_store(true)
             .cookie_provider(cookie.clone())
-            .default_headers(header)
+            .default_headers(HEADER.clone())
             .redirect(reqwest::redirect::Policy::limited(5))
             .build()
             .unwrap();
@@ -57,7 +62,7 @@ impl AttBot {
     }
 
     pub fn clear_cookie(&self) -> Result<(), Error> {
-        let mut lock = self.cookie.lock().map_err(|e| anyhow!("内部错误 {e}"))?;
+        let mut lock = self.cookie.lock().map_err(|e| anyhow!("{e}"))?;
         lock.clear();
         Ok(())
     }
@@ -69,9 +74,9 @@ impl AttBot {
     pub(crate) fn save_cookie_to<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
         let path = path.as_ref();
         let mut f = File::create(path)?;
-        let lock = self.cookie.lock().map_err(|e| anyhow!("内部错误 {e}"))?;
+        let lock = self.cookie.lock().map_err(|e| anyhow!("{e}"))?;
         lock.save_json(&mut f)
-            .map_err(|e| anyhow!("无法保存cookie {} {e}", path.display()))?;
+            .map_err(|e| anyhow!("无法保存cookie {}，Err: {}", path.display(), e))?;
         Ok(())
     }
 
@@ -86,7 +91,7 @@ impl AttBot {
         let path = path.as_ref();
         let f = File::open(path).map(std::io::BufReader::new)?;
         let cookie = reqwest_cookie_store::CookieStore::load_json(f).map_err(|e| anyhow!("{e}"))?;
-        let mut lock = self.cookie.lock().map_err(|e| anyhow!("{}", e))?;
+        let mut lock = self.cookie.lock().map_err(|e| anyhow!("{e}"))?;
         *lock = cookie;
         Ok(())
     }
@@ -96,6 +101,30 @@ impl AttBot {
             self.load_cookie_from(path)?;
         }
         Ok(())
+    }
+
+    /// 仅 POST 登录请求，并判断是否登录成功。
+    /// 登陆前可能需要 GET 一下登录页。
+    /// 重定向到签到页面
+    pub async fn login_post(&self) -> Result<Response, Error> {
+        let res = self
+            .client
+            .post(tjurl::TAKELOGIN)
+            .form(&[
+                ("username", self.user.name()),
+                ("password", self.user.pwd()),
+                ("logout", "7days"),
+                ("returnto", "attendance.php"),
+            ])
+            .send()
+            .await?;
+        // 这里无法通过 statuscode 重定向判断
+        if res.status().is_success() && !res.url().as_str().contains("login.php") {
+            // 登录成功
+            Ok(res)
+        } else {
+            Err(Error::UserVerification)
+        }
     }
 }
 
