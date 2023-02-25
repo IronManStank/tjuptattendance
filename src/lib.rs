@@ -10,6 +10,9 @@ pub use user::User;
 mod attbot;
 pub use attbot::AttBot;
 
+mod util;
+pub use util::{get_now, OFFECT};
+
 pub mod tjurl {
     /// 登陆链接
     pub const LOGIN: &str = "https://tjupt.org/login.php";

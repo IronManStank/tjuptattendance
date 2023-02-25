@@ -1,5 +1,6 @@
 use crate::{tjurl, Error, User};
 use anyhow::anyhow;
+use chrono::prelude::*;
 use lazy_static::lazy_static;
 use reqwest::{header::HeaderMap, Client, ClientBuilder, Response};
 use reqwest_cookie_store::CookieStoreMutex;
@@ -118,6 +119,7 @@ impl AttBot {
             ])
             .send()
             .await?;
+
         // 这里无法通过 statuscode 重定向判断
         if res.status().is_success() && !res.url().as_str().contains("login.php") {
             // 登录成功
@@ -127,7 +129,6 @@ impl AttBot {
         }
     }
 
-    #[allow(unused)]
     /// 立即签到 普通模式
     pub async fn att_now_normal(&self) -> Result<(), Error> {
         todo!()
@@ -135,7 +136,7 @@ impl AttBot {
 
     #[allow(unused)]
     /// 按照时间点
-    pub async fn att_top(&self, t: String) -> Result<(), Error> {
+    pub async fn att_top(&self, t: NaiveDateTime) -> Result<(), Error> {
         todo!()
     }
 }
