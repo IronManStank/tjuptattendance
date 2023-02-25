@@ -126,6 +126,18 @@ impl AttBot {
             Err(Error::UserVerification)
         }
     }
+
+    #[allow(unused)]
+    /// 立即签到 普通模式
+    pub async fn att_now_normal(&self) -> Result<(), Error> {
+        todo!()
+    }
+
+    #[allow(unused)]
+    /// 按照时间点
+    pub async fn att_top(&self, t: String) -> Result<(), Error> {
+        todo!()
+    }
 }
 
 impl Drop for AttBot {
