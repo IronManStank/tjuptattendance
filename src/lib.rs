@@ -13,6 +13,9 @@ pub use attbot::AttBot;
 mod util;
 pub use util::{get_now, OFFECT};
 
+mod config;
+pub use config::ConfigFile;
+
 pub mod tjurl {
     /// 登陆链接
     pub const LOGIN: &str = "https://tjupt.org/login.php";

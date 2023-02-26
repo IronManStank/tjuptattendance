@@ -33,7 +33,7 @@ lazy_static = "1.4.0"
 [dependencies.chrono]
 version = "0.4"
 default-features = false
-features = ["std", "clock"]
+features = ["std", "clock", "serde"]
 
 [dependencies.ahash]
 version = "0.8"
