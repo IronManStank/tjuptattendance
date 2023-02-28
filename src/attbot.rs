@@ -1,4 +1,4 @@
-use crate::{tjurl, Error, User};
+use crate::{tjurl, AttError, Error, User};
 use anyhow::anyhow;
 use chrono::prelude::*;
 use lazy_static::lazy_static;
@@ -23,6 +23,19 @@ lazy_static! {
         );
         header
     };
+}
+
+#[derive(Debug, Default)]
+pub enum AttState {
+    /// 需要签到
+    ToAtt,
+    /// 已经签到
+    Atted,
+    /// 签到中断
+    Interruption,
+    /// 未检测
+    #[default]
+    UnCheck,
 }
 
 #[derive(Debug)]
@@ -125,8 +138,13 @@ impl AttBot {
             // 登录成功
             Ok(res)
         } else {
-            Err(Error::UserVerification)
+            Err(AttError::UserVerification.into())
         }
+    }
+
+    /// 检查签到状态
+    pub fn check_status(&self) -> Result<AttState, Error> {
+        todo!()
     }
 
     /// 立即签到 普通模式

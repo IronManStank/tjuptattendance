@@ -8,7 +8,7 @@ mod user;
 pub use user::User;
 
 mod attbot;
-pub use attbot::AttBot;
+pub use attbot::{AttBot, AttState};
 
 mod util;
 pub use util::{get_now, OFFECT};
