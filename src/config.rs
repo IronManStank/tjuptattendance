@@ -79,8 +79,8 @@ impl ConfigFile {
             email: Some(EmailConfig {
                 username: "username@qq.com".to_string(),
                 password: "password".to_string(),
-                from: "from@qq.com".to_string(),
-                to: "to@qq.com".to_string(),
+                from: "from <from@email.com>".to_string(),
+                to: "to <to@email.com>".to_string(),
                 host: "smtp.host.com".to_string(),
                 port: 465,
             }),

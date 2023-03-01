@@ -1,31 +1,27 @@
-# 示例配置文件, 展示高级设置
+top = [
+    "08:00:00",
+    "20:00:00",
+    "00:00:00",
+    "18:00:00",
+    "22:00:00",
+    "07:00:00",
+    "06:00:00",
+    "12:00:00",
+]
 
-# 在此填写用户信息，可以指定多个
 [[users]]
-# 用户名
-name = "用户名"
-# 密码
-pwd = "密码"
+name = "username"
+pwd = "password"
 
-[[users]]
-name = "用户名2"
-pwd = "密码2" 
+[network]
+delay = 1000
+answer = 10
+post = 10
 
-# 全局设置
-[global]
-retry = 1
-
-# 邮件设置
-# 用来发送邮件提醒
-[global.emailconf]
-# 登陆名
-user = "登录名"
-# 发件人，可以不指定
-sender = "发件人"
-# 登陆密码
-pwd = "pwd"
-
-# smtp设置，如果不指定则是 smtp.qq.com
-host = "smtp.qq.com"
-# 端口，如果不指定则是465
+[email]
+username = "username@qq.com"
+password = "password"
+from = "from <from@email.com>"
+to = "to <to@email.com>"
+host = "smtp.host.com"
 port = 465
