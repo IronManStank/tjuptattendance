@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
 ## [1.1.6] - 2023-01-12
 ### Fixed
 - 修复严重BUG，请不要使用 `1.1.5` 版本，此BUG导致获取答案错误，会提交错误的答案
@@ -16,9 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 图片相似度改为百分比
 - 优化逻辑
 
+
 ## [1.1.4] - 2023-01-05
 ### Changed
 - 优化逻辑，加快签到速度
+
 
 ## [1.1.3] - 2022-12-30
 ### Fixed

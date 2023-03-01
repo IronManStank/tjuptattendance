@@ -1,12 +1,12 @@
 [package]
-name = "tjuptatt"
+name = "tjuptop"
 version = "1.1.6"
 edition = "2021"
 description = "TJUPT 签到工具，支持TOP10签到"
 documentation = "https://github.com/azureqaq/tjuptattendance"
 homepage = "https://github.com/azureqaq/tjuptattendance"
 repository = "https://github.com/azureqaq/tjuptattendance"
-default-run = "tjuptatt"
+default-run = "tjuptop"
 readme = "README.md"
 authors = ["AzureQAQ <azureqaq@gmail.com>"]
 license = "MIT"

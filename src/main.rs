@@ -1,4 +1,4 @@
-use tjuptatt::Error;
+use tjuptop::Error;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
