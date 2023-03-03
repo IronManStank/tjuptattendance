@@ -7,9 +7,10 @@
 
 use async_trait::async_trait;
 
-use crate::API;
+use crate::Error;
 
 #[async_trait]
-pub trait GetDouBanData {
-    type Target: API;
+pub trait Attendance {
+    async fn login(&self) -> Result<(), Error>;
+    async fn att_once_now(&self) -> Result<(), Error>;
 }

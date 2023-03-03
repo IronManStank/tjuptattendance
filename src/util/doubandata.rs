@@ -11,7 +11,7 @@ pub trait API {
         todo!()
     }
 
-    /// 从第三方获取
+    /// 从第三方API获取
     async fn new_from_third_party_api(
         _title: &str,
         _poster_len: usize,
