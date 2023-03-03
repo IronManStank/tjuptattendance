@@ -15,6 +15,17 @@ categories = ["command-line-utilities"]
 build =  "build.rs"
 autotests = false
 
+[workspace]
+members = [
+    "tjupt_models",
+    "doubandataserver",
+    "util"
+]
+
+
+[[bin]]
+name = "server"
+path = "./doubandataserver/src/main.rs"
 
 [[test]]
 name = "integration"
@@ -27,6 +38,9 @@ serde = { version = "1.0", features = ["derive"] }
 thiserror = "1.0"
 lazy_static = "1.4"
 async-trait = "0.1"
+tjupt_models = { path = "./tjupt_models" }
+util = { path = "./util" }
+
 
 [dependencies.chrono]
 version = "0.4"
