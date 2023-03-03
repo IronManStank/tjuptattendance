@@ -1,3 +1,4 @@
+pub mod doubandata;
 pub mod user;
 
 use chrono::prelude::*;
@@ -9,8 +10,7 @@ lazy_static! {
 }
 
 /// 获取东八区当前时间
-pub fn get_now() -> NaiveDateTime {
+pub fn get_east_eight_now() -> NaiveDateTime {
     let now = DateTime::<FixedOffset>::from_utc(Utc::now().naive_utc(), *OFFSET);
-    println!("{}", Local::now());
     now.naive_local()
 }
