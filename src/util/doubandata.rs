@@ -3,15 +3,23 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::{fmt::Display, hash::Hash};
 
+/// 豆瓣数据
 #[async_trait]
 pub trait Data {
+    /// 根据title获取数据
+    async fn new(_title: &str) -> Result<DouBanData, Error> {
+        todo!()
+    }
     fn id(&self) -> &str;
     fn title(&self) -> &str;
     fn sub_title(&self) -> &str;
     async fn img_len(&self) -> Result<usize, Error>;
+    /// 如果已经是 DouBanData 则会返回自身，
+    /// 如果是其他类型，则可能会失败
+    async fn to_doubandata(self) -> Result<DouBanData, Error>;
 }
 
-/// 直接可用的豆瓣数据，可以由 RawDouBanData 转换，或者可以从自建API直接获得
+/// 直接可用于获取答案的豆瓣数据，可以由 RawDouBanData 转换，或者可以从自建API直接获得
 #[derive(Debug, Serialize, Deserialize, Eq, Clone)]
 pub struct DouBanData {
     pub(crate) id: String,
@@ -43,14 +51,21 @@ impl Data for DouBanData {
     fn id(&self) -> &str {
         &self.id
     }
+
     fn title(&self) -> &str {
         &self.title
     }
+
     fn sub_title(&self) -> &str {
         &self.sub_title
     }
+
     async fn img_len(&self) -> Result<usize, Error> {
         Ok(self.img_len)
+    }
+
+    async fn to_doubandata(self) -> Result<DouBanData, Error> {
+        Ok(self)
     }
 }
 
@@ -58,6 +73,7 @@ impl Data for DouBanData {
 #[derive(Debug, Serialize, Deserialize, Eq, Clone)]
 pub struct RawDouBanData {
     pub(crate) id: String,
+    /// 海报链接
     pub(crate) img: String,
     pub(crate) title: String,
     pub(crate) sub_title: String,
@@ -103,9 +119,11 @@ impl Data for RawDouBanData {
     fn id(&self) -> &str {
         &self.id
     }
+
     fn title(&self) -> &str {
         &self.title
     }
+
     fn sub_title(&self) -> &str {
         &self.sub_title
     }
@@ -114,5 +132,9 @@ impl Data for RawDouBanData {
     /// 推荐的方式是转换为DouBanData
     async fn img_len(&self) -> Result<usize, Error> {
         self.get_img_len().await
+    }
+
+    async fn to_doubandata(self) -> Result<DouBanData, Error> {
+        self.get_data().await
     }
 }
