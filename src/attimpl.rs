@@ -7,9 +7,9 @@
 
 use async_trait::async_trait;
 
-use crate::Data;
+use crate::API;
 
 #[async_trait]
 pub trait GetDouBanData {
-    type Target: Data;
+    type Target: API;
 }

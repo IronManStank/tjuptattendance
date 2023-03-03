@@ -3,13 +3,21 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::{fmt::Display, hash::Hash};
 
-/// 豆瓣数据
+/// 豆瓣数据 API
 #[async_trait]
-pub trait Data {
-    /// 根据title获取数据
-    async fn new(_title: &str) -> Result<DouBanData, Error> {
+pub trait API {
+    /// 从
+    async fn new_from_douban_api(_title: &str, _poster_len: usize) -> Result<RawDouBanData, Error> {
         todo!()
     }
+
+    async fn new_from_third_party_api(
+        _title: &str,
+        _poster_len: usize,
+    ) -> Result<DouBanData, Error> {
+        todo!()
+    }
+
     fn id(&self) -> &str;
     fn title(&self) -> &str;
     fn sub_title(&self) -> &str;
@@ -47,7 +55,7 @@ impl Display for DouBanData {
 }
 
 #[async_trait]
-impl Data for DouBanData {
+impl API for DouBanData {
     fn id(&self) -> &str {
         &self.id
     }
@@ -115,7 +123,7 @@ impl Display for RawDouBanData {
 }
 
 #[async_trait]
-impl Data for RawDouBanData {
+impl API for RawDouBanData {
     fn id(&self) -> &str {
         &self.id
     }
