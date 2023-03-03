@@ -6,11 +6,12 @@ use std::{fmt::Display, hash::Hash};
 /// 豆瓣数据 API
 #[async_trait]
 pub trait API {
-    /// 从
-    async fn new_from_douban_api(_title: &str, _poster_len: usize) -> Result<RawDouBanData, Error> {
+    /// 从豆瓣API获取
+    async fn new_from_douban_api(_title: &str, _poster_len: usize) -> Result<DouBanData, Error> {
         todo!()
     }
 
+    /// 从第三方获取
     async fn new_from_third_party_api(
         _title: &str,
         _poster_len: usize,
