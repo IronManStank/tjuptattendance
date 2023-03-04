@@ -110,6 +110,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "common"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "lazy_static",
+ "serde",
+]
+
+[[package]]
 name = "core-foundation-sys"
 version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -550,6 +559,7 @@ dependencies = [
  "anyhow",
  "async-trait",
  "chrono",
+ "common",
  "embed-resource",
  "lazy_static",
  "pretty_assertions",
