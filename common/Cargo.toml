@@ -5,11 +5,19 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+
 [dependencies]
 lazy_static = "1.4"
 serde = { version = "1.0", features = ["derive"] }
+async-trait = "0.1"
+reqwest = { version = "0", features = ["json"], optional = true }
 
 [dependencies.chrono]
 version = "0.4"
 default-features = false
 features = ["clock", "std"]
+
+
+[features]
+origin_impl = ["reqwest"]
+default = ["origin_impl"]
