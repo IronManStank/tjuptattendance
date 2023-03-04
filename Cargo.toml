@@ -17,9 +17,9 @@ autotests = false
 
 [workspace]
 members = [
-    "tjupt_models",
-    "doubandataserver",
-    "util"
+    # "tjupt_models",
+    # "doubandataserver",
+    # "util"
 ]
 
 
@@ -38,8 +38,6 @@ serde = { version = "1.0", features = ["derive"] }
 thiserror = "1.0"
 lazy_static = "1.4"
 async-trait = "0.1"
-tjupt_models = { path = "./tjupt_models" }
-util = { path = "./util" }
 
 
 [dependencies.chrono]

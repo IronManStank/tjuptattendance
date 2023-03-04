@@ -176,19 +176,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "56254986775e3233ffa9c4d7d3faaf6d36a2c09d30b20687e9f88bc8bafc16c8"
 
 [[package]]
-name = "doubandataserver"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "embed-resource",
- "pretty_assertions",
- "tempdir",
- "thiserror",
- "tokio",
- "tokio-test",
-]
-
-[[package]]
 name = "embed-resource"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -557,13 +544,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tjupt_models"
-version = "0.1.0"
-dependencies = [
- "serde",
-]
-
-[[package]]
 name = "tjuptop"
 version = "1.1.6"
 dependencies = [
@@ -576,10 +556,8 @@ dependencies = [
  "serde",
  "tempdir",
  "thiserror",
- "tjupt_models",
  "tokio",
  "tokio-test",
- "util",
 ]
 
 [[package]]
@@ -651,14 +629,6 @@ name = "unicode-width"
 version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c0edd1e5b14653f783770bce4a4dabb4a5108a5370a5f5d8cfe8710c361f6c8b"
-
-[[package]]
-name = "util"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "lazy_static",
-]
 
 [[package]]
 name = "vswhom"
