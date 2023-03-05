@@ -3,7 +3,6 @@ pub enum Error {
     #[error(transparent)]
     Web(#[from] reqwest::Error),
 
-    #[cfg(feature = "origin_impl")]
     #[error(transparent)]
     Orimpl(#[from] OrimplError),
 

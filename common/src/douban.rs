@@ -11,9 +11,9 @@
 
 use async_trait::async_trait;
 use lazy_static::lazy_static;
-#[cfg(feature = "origin_impl")]
+
 use reqwest::ClientBuilder;
-#[cfg(feature = "origin_impl")]
+
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use std::hash::Hash;
@@ -23,7 +23,7 @@ pub trait Answer: Debug + Hash + PartialEq + Eq + Clone + Send + Sized {}
 
 // 此数据应该与豆瓣API同步更新 (虽然不大可能)
 /// 豆瓣API提供的原始数据
-#[cfg(feature = "origin_impl")]
+
 #[derive(Debug, Serialize, Deserialize, Eq, Clone)]
 pub struct OriginDouBanData {
     pub(crate) id: String,
@@ -33,7 +33,6 @@ pub struct OriginDouBanData {
     pub(crate) img_url: String,
 }
 
-#[cfg(feature = "origin_impl")]
 impl OriginDouBanData {
     pub fn id(&self) -> &str {
         &self.id
@@ -52,21 +51,18 @@ impl OriginDouBanData {
     }
 }
 
-#[cfg(feature = "origin_impl")]
 impl Hash for OriginDouBanData {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.id.hash(state);
     }
 }
 
-#[cfg(feature = "origin_impl")]
 impl PartialEq for OriginDouBanData {
     fn eq(&self, other: &Self) -> bool {
         self.id == other.id
     }
 }
 
-#[cfg(feature = "origin_impl")]
 impl std::fmt::Display for OriginDouBanData {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Data[{}-{}]", self.title, self.id)
@@ -74,10 +70,9 @@ impl std::fmt::Display for OriginDouBanData {
 }
 
 /// 原始数据也可以作为答案
-#[cfg(feature = "origin_impl")]
+
 impl Answer for OriginDouBanData {}
 
-#[cfg(feature = "origin_impl")]
 #[derive(Debug, Serialize, Deserialize, Eq, Clone)]
 pub struct SeverData {
     pub(crate) id: String,
@@ -88,7 +83,6 @@ pub struct SeverData {
     pub(crate) img_len: u64,
 }
 
-#[cfg(feature = "origin_impl")]
 impl SeverData {
     pub fn id(&self) -> &str {
         &self.id
@@ -111,28 +105,24 @@ impl SeverData {
     }
 }
 
-#[cfg(feature = "origin_impl")]
 impl Hash for SeverData {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.id.hash(state);
     }
 }
 
-#[cfg(feature = "origin_impl")]
 impl PartialEq for SeverData {
     fn eq(&self, other: &Self) -> bool {
         self.id == other.id
     }
 }
 
-#[cfg(feature = "origin_impl")]
 impl std::fmt::Display for SeverData {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Data[{}-{}]", self.title, self.id)
     }
 }
 
-#[cfg(feature = "origin_impl")]
 impl Answer for SeverData {}
 
 /// 将 API 数据，转换为 Answer
@@ -146,7 +136,6 @@ where
     async fn to_answer(self) -> Result<T, Self::Error>;
 }
 
-#[cfg(feature = "origin_impl")]
 #[async_trait]
 impl IntoAnswer<OriginDouBanData> for OriginDouBanData {
     type Error = ();
@@ -155,7 +144,6 @@ impl IntoAnswer<OriginDouBanData> for OriginDouBanData {
     }
 }
 
-#[cfg(feature = "origin_impl")]
 lazy_static! {
     static ref HEADERS: reqwest::header::HeaderMap = {
         let mut h = reqwest::header::HeaderMap::new();
@@ -171,7 +159,6 @@ lazy_static! {
     };
 }
 
-#[cfg(feature = "origin_impl")]
 #[async_trait]
 impl IntoAnswer<SeverData> for OriginDouBanData {
     type Error = crate::error::Error;
@@ -200,7 +187,6 @@ impl IntoAnswer<SeverData> for OriginDouBanData {
     }
 }
 
-#[cfg(feature = "origin_impl")]
 #[async_trait]
 impl IntoAnswer<SeverData> for SeverData {
     type Error = ();
