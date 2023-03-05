@@ -19,4 +19,6 @@ pub enum DouBanDataError {
     OutDated,
     #[error("无法找到海报")]
     PosterNotFound,
+    #[error("API获取信息失败")]
+    ApiTired,
 }

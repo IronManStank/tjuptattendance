@@ -14,17 +14,18 @@ use async_trait::async_trait;
 use chrono::prelude::*;
 use lazy_static::lazy_static;
 
-use reqwest::ClientBuilder;
+use reqwest::{Client, ClientBuilder};
 
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::sync::Arc;
 
-use crate::error::Error;
+use crate::error::{DouBanDataError, Error};
 use crate::time::get_now;
 
 const IMG_LEN_DIFF: u64 = 6;
+const DOUBAN_SUGGEST_URL: &str = "https://movie.douban.com/j/subject_suggest";
 
 pub trait Poster: Debug + Hash + Eq + Clone + Send + Sized {
     /// 检查是否可用
@@ -47,6 +48,87 @@ pub trait Answer: Debug + Hash + Eq + Clone + Send + Sized {
     type Poster: Poster;
     /// 检查是否为答案
     fn is_answer(&self, poster: Arc<Self::Poster>) -> bool;
+}
+
+#[async_trait]
+pub trait Api<A: Answer, T: IntoAnswer<A>>: Sized + Eq + Hash + Send {
+    type Output: IntoAnswer<A>;
+    type Error;
+
+    async fn get_answer(&self, title: String) -> Result<Self::Output, Self::Error>;
+}
+
+pub trait Question<P, A, D, M>: Sized + Eq + Hash + Send
+where
+    D: Answer,
+    P: Poster,
+    A: IntoAnswer<D>,
+    M: Api<D, A>,
+{
+}
+
+/// - url: GET `https://movie.douban.com/j/subject_suggest?q=三体`
+/// - return JSON `[OriginDouBanData, ...]`
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+pub struct DouBanApi;
+
+/// 自建API
+/// - url: POST JSON
+/// - retrun JSON `[SeverData, ...]`
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+pub struct MyUpStreamApi {
+    pub(crate) url: String,
+}
+
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+pub struct MixedApi {
+    pub(crate) url: String,
+}
+
+impl MyUpStreamApi {
+    pub fn new(url: String) -> Self {
+        Self { url }
+    }
+}
+
+#[async_trait]
+impl Api<SeverData, OriginDouBanData> for MixedApi {
+    type Output = SeverData;
+    type Error = Error;
+
+    async fn get_answer(&self, title: String) -> Result<Self::Output, Self::Error> {
+        todo!()
+    }
+}
+
+#[async_trait]
+impl Api<SeverData, OriginDouBanData> for DouBanApi {
+    type Output = SeverData;
+    type Error = Error;
+    async fn get_answer(&self, title: String) -> Result<Self::Output, Self::Error> {
+        let client = get_data_client();
+        let res: Vec<OriginDouBanData> = client
+            .get(DOUBAN_SUGGEST_URL)
+            .query(&[("q", &title)])
+            .send()
+            .await?
+            .json()
+            .await?;
+        let r = res.into_iter().nth(0).ok_or(DouBanDataError::ApiTired)?;
+        let r = r.to_answer().await?;
+        Ok(r)
+    }
+}
+
+#[async_trait]
+impl Api<SeverData, SeverData> for MyUpStreamApi {
+    type Output = SeverData;
+    type Error = Error;
+
+    async fn get_answer(&self, title: String) -> Result<Self::Output, Self::Error> {
+        println!("{title}");
+        todo!()
+    }
 }
 
 #[derive(Debug, Eq, Clone)]
@@ -214,15 +296,19 @@ lazy_static! {
 }
 
 #[async_trait]
+impl IntoAnswer<SeverData> for SeverData {
+    type Error = Error;
+    /// 直接返回自身，不会失败
+    async fn to_answer(self) -> Result<SeverData, Self::Error> {
+        Ok(self)
+    }
+}
+
+#[async_trait]
 impl IntoAnswer<SeverData> for OriginDouBanData {
     type Error = Error;
     async fn to_answer(self) -> Result<SeverData, Self::Error> {
-        let client = ClientBuilder::new()
-            .default_headers(HEADERS.clone())
-            .timeout(std::time::Duration::from_secs(30))
-            .redirect(reqwest::redirect::Policy::limited(3))
-            .build()
-            .unwrap_or_default();
+        let client = get_data_client();
 
         let img_len = client
             .get(self.img_url())
@@ -239,6 +325,16 @@ impl IntoAnswer<SeverData> for OriginDouBanData {
             img_len,
         })
     }
+}
+
+pub(crate) fn get_data_client() -> Client {
+    let client = ClientBuilder::new()
+        .default_headers(HEADERS.clone())
+        .timeout(std::time::Duration::from_secs(30))
+        .redirect(reqwest::redirect::Policy::limited(3))
+        .build()
+        .unwrap_or_default();
+    client
 }
 
 #[cfg(test)]
