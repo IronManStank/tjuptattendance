@@ -9,7 +9,9 @@
 //!
 //! 即：**附加** 除了原始信息以外的经过预处理的信息
 
+use anyhow::anyhow;
 use async_trait::async_trait;
+use chrono::prelude::*;
 use lazy_static::lazy_static;
 
 use reqwest::ClientBuilder;
@@ -17,9 +19,79 @@ use reqwest::ClientBuilder;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use std::hash::Hash;
+use std::sync::Arc;
+
+use crate::error::Error;
+use crate::time::get_now;
+
+const IMG_LEN_DIFF: u64 = 6;
+
+pub trait Poster: Debug + Hash + Eq + Clone + Send + Sized {
+    /// 检查是否可用
+    fn is_available(&self) -> bool;
+}
+
+/// 将 API 数据，转换为 Answer
+#[async_trait]
+pub trait IntoAnswer<T>: Debug + Hash + Eq + Clone + Send + Sized
+where
+    T: Answer,
+{
+    type Error: Send;
+    /// 将 API 数据，转换为可直接使用的 Answer
+    async fn to_answer(self) -> Result<T, Self::Error>;
+}
 
 /// 可以直接使用的数据
-pub trait Answer: Debug + Hash + PartialEq + Eq + Clone + Send + Sized {}
+pub trait Answer: Debug + Hash + Eq + Clone + Send + Sized {
+    type Poster: Poster;
+    /// 检查是否为答案
+    fn is_answer(&self, poster: Arc<Self::Poster>) -> bool;
+}
+
+#[derive(Debug, Eq, Clone)]
+pub struct TjuPoster {
+    pub(crate) date: NaiveDate,
+    // url 包含日期与随机字符
+    pub(crate) url: reqwest::Url,
+    pub(crate) img_len: u64,
+}
+
+impl Hash for TjuPoster {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.url.hash(state);
+    }
+}
+
+impl PartialEq for TjuPoster {
+    fn eq(&self, other: &Self) -> bool {
+        self.url == other.url
+    }
+}
+
+impl TjuPoster {
+    // 必须在用户登陆后获取
+    pub fn new(url: String, img_len: u64) -> Result<Self, Error> {
+        let url = reqwest::Url::parse(&url).map_err(|e| anyhow!("无法解析海报日期 {e}"))?;
+        // 通过解析 url 链接来获取poster可用日期
+        println!("{url}, {img_len}");
+        let Some(d) = url.path_segments().map(|c| c.collect::<Vec<_>>()).and_then(|lst| lst.get(1).copied() ) else {
+            return Err(Error::Other(anyhow!("无法解析海报链接")));
+        };
+        let date = NaiveDate::parse_from_str(d, "%Y-%m-%d")
+            .map_err(|e| anyhow!("无法获取海报日期 {e}"))?;
+
+        // https://tjupt.org/assets/2023-03-05/asdqweQ.jpg
+        Ok(Self { date, url, img_len })
+    }
+}
+
+impl Poster for TjuPoster {
+    fn is_available(&self) -> bool {
+        // 检查poster是否过期
+        get_now().date() == self.date
+    }
+}
 
 // 此数据应该与豆瓣API同步更新 (虽然不大可能)
 /// 豆瓣API提供的原始数据
@@ -69,10 +141,6 @@ impl std::fmt::Display for OriginDouBanData {
     }
 }
 
-/// 原始数据也可以作为答案
-
-impl Answer for OriginDouBanData {}
-
 #[derive(Debug, Serialize, Deserialize, Eq, Clone)]
 pub struct SeverData {
     pub(crate) id: String,
@@ -119,28 +187,15 @@ impl PartialEq for SeverData {
 
 impl std::fmt::Display for SeverData {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Data[{}-{}]", self.title, self.id)
+        write!(f, "Data[{}-{}-{}]", self.title, self.id, self.img_len)
     }
 }
 
-impl Answer for SeverData {}
-
-/// 将 API 数据，转换为 Answer
-#[async_trait]
-pub trait IntoAnswer<T>
-where
-    T: Answer,
-{
-    type Error: Send;
-    /// 将 API 数据，转换为可直接使用的 Answer
-    async fn to_answer(self) -> Result<T, Self::Error>;
-}
-
-#[async_trait]
-impl IntoAnswer<OriginDouBanData> for OriginDouBanData {
-    type Error = ();
-    async fn to_answer(self) -> Result<OriginDouBanData, Self::Error> {
-        Ok(self)
+impl Answer for SeverData {
+    type Poster = TjuPoster;
+    /// 海报与答案相差6bytes
+    fn is_answer(&self, poster: Arc<Self::Poster>) -> bool {
+        poster.is_available() && self.img_len.abs_diff(poster.img_len) == IMG_LEN_DIFF
     }
 }
 
@@ -161,7 +216,7 @@ lazy_static! {
 
 #[async_trait]
 impl IntoAnswer<SeverData> for OriginDouBanData {
-    type Error = crate::error::Error;
+    type Error = Error;
     async fn to_answer(self) -> Result<SeverData, Self::Error> {
         let client = ClientBuilder::new()
             .default_headers(HEADERS.clone())
@@ -175,7 +230,7 @@ impl IntoAnswer<SeverData> for OriginDouBanData {
             .send()
             .await?
             .content_length()
-            .ok_or(crate::error::OrimplError::ImgLenNotFound)?;
+            .ok_or(crate::error::DouBanDataError::ImgLenNotFound)?;
 
         Ok(SeverData {
             id: self.id,
@@ -187,10 +242,35 @@ impl IntoAnswer<SeverData> for OriginDouBanData {
     }
 }
 
-#[async_trait]
-impl IntoAnswer<SeverData> for SeverData {
-    type Error = ();
-    async fn to_answer(self) -> Result<SeverData, Self::Error> {
-        Ok(self)
+#[cfg(test)]
+mod doubandata_test {
+    use super::*;
+    use pretty_assertions::assert_eq;
+    use std::sync::Arc;
+    use tokio_test::block_on;
+
+    #[test]
+    fn is_answer_test() {
+        let sdata = block_on(async {
+            let ori = OriginDouBanData {
+                id: "id".into(),
+                title: "title".into(),
+                sub_title: None,
+                img_url: "https://www.3moredays.com/assets/img/thumb.png".into(),
+            };
+            let ans = ori.to_answer().await.unwrap();
+            ans
+        });
+
+        let poster = Arc::new(
+            TjuPoster::new(
+                "https://tjupt.org/assets/2023-03-05/asdqweQ.jpg".into(),
+                396424 + IMG_LEN_DIFF,
+            )
+            .unwrap(),
+        );
+
+        assert_eq!(sdata.img_len(), 396424);
+        assert!(sdata.is_answer(poster));
     }
 }

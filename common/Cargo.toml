@@ -17,4 +17,9 @@ anyhow = "1.0"
 [dependencies.chrono]
 version = "0.4"
 default-features = false
-features = ["clock", "std"]
+features = ["clock", "std", "serde"]
+
+[dev-dependencies]
+pretty_assertions = "1"
+tokio-test = "*"
+tempdir = "0.3"
