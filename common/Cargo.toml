@@ -13,6 +13,7 @@ async-trait = "0.1"
 reqwest = { version = "0", features = ["json"] }
 thiserror = "1.0"
 anyhow = "1.0"
+ahash = { version = "0.8", default-features = false, features = ["std", "compile-time-rng"] }
 
 [dependencies.chrono]
 version = "0.4"
