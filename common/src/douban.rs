@@ -72,9 +72,8 @@ impl PartialEq for TjuPoster {
 impl TjuPoster {
     // 必须在用户登陆后获取
     pub fn new(url: String, img_len: u64) -> Result<Self, Error> {
-        let url = reqwest::Url::parse(&url).map_err(|e| anyhow!("无法解析海报日期 {e}"))?;
+        let url = reqwest::Url::parse(&url).map_err(|e| anyhow!("无法解析海报链接 {e}"))?;
         // 通过解析 url 链接来获取poster可用日期
-        println!("{url}, {img_len}");
         let Some(d) = url.path_segments().map(|c| c.collect::<Vec<_>>()).and_then(|lst| lst.get(1).copied() ) else {
             return Err(Error::Other(anyhow!("无法解析海报链接")));
         };
@@ -258,13 +257,16 @@ mod doubandata_test {
                 sub_title: None,
                 img_url: "https://www.3moredays.com/assets/img/thumb.png".into(),
             };
-            let ans = ori.to_answer().await.unwrap();
-            ans
+            let sev = ori.to_answer().await.unwrap();
+            sev
         });
 
         let poster = Arc::new(
             TjuPoster::new(
-                "https://tjupt.org/assets/2023-03-05/asdqweQ.jpg".into(),
+                format!(
+                    "https://tjupt.org/assets/{}/asdqweQ.jpg",
+                    get_now().date().format("%Y-%m-%d")
+                ),
                 396424 + IMG_LEN_DIFF,
             )
             .unwrap(),
