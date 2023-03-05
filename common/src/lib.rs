@@ -9,3 +9,4 @@
 pub mod douban;
 pub mod time;
 pub mod user;
+pub mod error;
