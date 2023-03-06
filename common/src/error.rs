@@ -21,4 +21,6 @@ pub enum DouBanDataError {
     PosterNotFound,
     #[error("API获取信息失败")]
     ApiTired,
+    #[error("未找到答案")]
+    NotAnswer,
 }

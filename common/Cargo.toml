@@ -9,16 +9,22 @@ edition = "2021"
 [dependencies]
 lazy_static = "1.4"
 serde = { version = "1.0", features = ["derive"] }
-async-trait = "0.1"
 reqwest = { version = "0", features = ["json"] }
 thiserror = "1.0"
 anyhow = "1.0"
-ahash = { version = "0.8", default-features = false, features = ["std", "compile-time-rng"] }
+ahash = { version = "0.8", default-features = false, features = ["std", "compile-time-rng", "serde"] }
 
 [dependencies.chrono]
 version = "0.4"
 default-features = false
 features = ["clock", "std", "serde"]
+
+[dependencies.tokio]
+version = "1.26"
+default-features = false
+features = [
+    "rt-multi-thread", "macros", "parking_lot"
+]
 
 [dev-dependencies]
 pretty_assertions = "1"

@@ -11,6 +11,7 @@ dependencies = [
  "cfg-if",
  "const-random",
  "once_cell",
+ "serde",
  "version_check",
 ]
 
@@ -133,7 +134,6 @@ version = "0.1.0"
 dependencies = [
  "ahash",
  "anyhow",
- "async-trait",
  "chrono",
  "lazy_static",
  "pretty_assertions",
@@ -141,6 +141,7 @@ dependencies = [
  "serde",
  "tempdir",
  "thiserror",
+ "tokio",
  "tokio-test",
 ]
 
