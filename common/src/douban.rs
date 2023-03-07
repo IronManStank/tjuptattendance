@@ -138,8 +138,8 @@ pub struct Poster {
 }
 
 impl Poster {
-    pub fn is_answer(&self, pot: &DouBanData) -> bool {
-        self.img_len.abs_diff(pot.img_len) == 6
+    pub fn is_answer(&self, data: &DouBanData) -> bool {
+        self.img_len.abs_diff(data.img_len) == 6
     }
 
     pub fn date(&self) -> NaiveDate {
@@ -355,25 +355,18 @@ mod api_test {
 
     #[tokio::test]
     async fn doubanapi_test() {
-        let img_len = get_client()
-            .get("https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2886492021.webp")
-            .send()
-            .await
-            .unwrap()
-            .content_length()
-            .unwrap();
         let poster = Poster {
             date: get_now().date(),
-            url: "https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2886492021.webp"
+            url: "https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2886492021.jpg"
                 .into(),
-            img_len,
+            img_len: 17075-6,
         };
         let q = Question::new(
             poster,
             [
                 Opt {
                     title: "哈哈".into(),
-                    value: "asd".into(),
+                    value: "".into(),
                 },
                 Opt {
                     title: "三体".into(),
@@ -385,8 +378,8 @@ mod api_test {
         let res = q.get_answer(true, [], false).await;
 
         assert_str_eq!(
-            Error::Data(DouBanDataError::ApiTired).to_string(),
-            res.err().unwrap().to_string()
+            res.err().unwrap().to_string(),
+            Error::Data(DouBanDataError::ApiTired).to_string()
         );
 
         // let res = res.unwrap();
@@ -400,5 +393,17 @@ mod api_test {
         //         img_len: 345
         //     }
         // );
+    }
+
+    #[tokio::test]
+    async fn ask_douban_api_test() {
+        let data = DouBanData {
+            id: "26647087".into(),
+            img_url: "https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2886492021.jpg".into(),
+            title: "三体".into(),
+            img_len: 17075,
+        };
+        let apidata = DouBanApi::get_data(&data.title).await.unwrap();
+        assert_eq!(apidata, data);
     }
 }
