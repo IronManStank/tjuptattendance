@@ -359,7 +359,7 @@ mod api_test {
             date: get_now().date(),
             url: "https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2886492021.jpg"
                 .into(),
-            img_len: 17075-6,
+            img_len: 17075 - 6,
         };
         let q = Question::new(
             poster,
@@ -399,7 +399,8 @@ mod api_test {
     async fn ask_douban_api_test() {
         let data = DouBanData {
             id: "26647087".into(),
-            img_url: "https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2886492021.jpg".into(),
+            img_url: "https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2886492021.jpg"
+                .into(),
             title: "三体".into(),
             img_len: 17075,
         };
