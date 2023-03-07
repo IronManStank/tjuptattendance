@@ -348,10 +348,8 @@ pub(crate) fn get_client() -> Client {
 
 #[cfg(test)]
 mod api_test {
-    use crate::time::get_now;
-
     use super::*;
-    use pretty_assertions::assert_str_eq;
+    use crate::time::get_now;
 
     #[tokio::test]
     async fn doubanapi_test() {
@@ -375,27 +373,22 @@ mod api_test {
             ],
         );
 
-        let res = q.get_answer(true, [], false).await;
+        let res = q.get_answer(true, [], false).await.unwrap();
 
-        assert_str_eq!(
-            res.err().unwrap().to_string(),
-            Error::Data(DouBanDataError::ApiTired).to_string()
+        assert_eq!(
+            res,
+            DouBanData {
+                id: "26647087".into(),
+                img_url: "url".into(),
+                title: "三体".into(),
+                img_len: 345
+            }
         );
-
-        // let res = res.unwrap();
-
-        // assert_eq!(
-        //     res,
-        //     DouBanData {
-        //         id: "26647087".into(),
-        //         img_url: "url".into(),
-        //         title: "三体".into(),
-        //         img_len: 345
-        //     }
-        // );
     }
 
     #[tokio::test]
+    /// 测试豆瓣API能否正确获取豆瓣数据
+    /// 如果频繁调用会失败，但是成功一次就可以
     async fn ask_douban_api_test() {
         let data = DouBanData {
             id: "26647087".into(),
@@ -405,6 +398,6 @@ mod api_test {
             img_len: 17075,
         };
         let apidata = DouBanApi::get_data(&data.title).await.unwrap();
-        assert_eq!(apidata, data);
+        assert_eq!(apidata, data,);
     }
 }
