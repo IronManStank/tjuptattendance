@@ -359,15 +359,16 @@ mod api_test {
                 .into(),
             img_len: 17075 - 6,
         };
+        let opt = Opt {
+            title: "三体".into(),
+            value: "".into(),
+        };
         let q = Question::new(
             poster,
             [
+                opt.clone(),
                 Opt {
-                    title: "哈哈".into(),
-                    value: "".into(),
-                },
-                Opt {
-                    title: "三体".into(),
+                    title: "嘻嘻".into(),
                     value: "".into(),
                 },
             ],
@@ -384,6 +385,8 @@ mod api_test {
                 img_len: 345
             }
         );
+
+        assert_eq!(&opt, q.get_value("三体").unwrap());
     }
 
     #[tokio::test]
