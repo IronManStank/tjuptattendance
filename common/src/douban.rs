@@ -55,51 +55,51 @@ impl std::fmt::Display for DouBanData {
 }
 
 #[derive(Debug, Serialize, Deserialize, Eq, Clone)]
-pub struct MyApi {
+pub struct Api {
     pub(crate) url: String,
     pub(crate) token: Option<String>,
+    pub(crate) report: Option<bool>,
 }
-impl MyApi {
-    fn token(&self) -> Option<&str> {
+
+impl Api {
+    const DOUBAN_API: &str = "https://movie.douban.com/j/subject_suggest";
+
+    pub fn token(&self) -> Option<&str> {
         self.token.as_deref()
+    }
+
+    pub fn new_doubanapi() -> Self {
+        Self {
+            url: Self::DOUBAN_API.into(),
+            token: None,
+            report: None,
+        }
+    }
+
+    pub fn report(&self) -> bool {
+        self.report.unwrap_or(false)
+    }
+
+    pub async fn get_data(title: &str) -> Result<DouBanData, Error> {
+        println!("{title}");
+        todo!()
     }
 }
 
-impl Hash for MyApi {
+impl Hash for Api {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.url.hash(state);
     }
 }
 
-impl PartialEq for MyApi {
+impl PartialEq for Api {
     fn eq(&self, other: &Self) -> bool {
         self.url == other.url
     }
 }
 
-/// 从豆瓣 api 获取返回的数据，并默认第一个为答案
-pub async fn get_data_by_douban_api(title: &str) -> Result<DouBanData, Error> {
-    let client = get_client();
-    let doubandata_vec: Vec<DouBanData> = client
-        .get("https://movie.douban.com/j/subject_suggest")
-        .query(&[("q", title)])
-        .send()
-        .await?
-        .json()
-        .await?;
-
-    // 获取一遍 img_len
-
-    let Some(data) = doubandata_vec.into_iter().next() else {
-        return Err(DouBanDataError::ApiTired.into());
-    };
-
-    let data_with_len = data.get_img_len(&client).await?;
-    Ok(data_with_len)
-}
-
 /// 从自定义API获取
-pub async fn get_data_by_my_api(api: MyApi, title: &str) -> Result<DouBanData, Error> {
+pub async fn get_data_by_my_api(api: &Api, title: &str) -> Result<DouBanData, Error> {
     let client = get_client();
     let data_vec: Vec<DouBanData> = client
         .get(&api.url)
@@ -108,11 +108,22 @@ pub async fn get_data_by_my_api(api: MyApi, title: &str) -> Result<DouBanData, E
         .await?
         .json()
         .await?;
+
+    // TODO 可以在此返回数据
+    if api.report() && data_vec.get(0).map(|d| d.img_len != 0).unwrap_or(false) {
+        // 返回API数据
+    }
+
     let Some(data) = data_vec.into_iter().next() else {
         return Err(DouBanDataError::ApiTired.into());
     };
 
-    Ok(data)
+    if data.img_len == 0 {
+        Ok(data.get_img_len(&client).await?)
+    } else {
+        // 从自建API获取的数据
+        Ok(data)
+    }
 }
 
 lazy_static! {
@@ -155,7 +166,9 @@ mod test_douban_api {
             title: "三体".into(),
             img_len: 17075,
         };
-        let data = get_data_by_douban_api("三体").await.unwrap();
+        let data = get_data_by_my_api(&Api::new_doubanapi(), "三体")
+            .await
+            .unwrap();
         // DouBanData 实现了 Eq，所以不能直接比较，而是比较其 Debug 的字符
         assert_str_eq!(format!("{:#?}", data_origin), format!("{:#?}", data));
 
@@ -172,11 +185,12 @@ mod test_douban_api {
         assert_str_eq!(format!("{:#?}", data_origin), format!("{:#?}", data_1));
 
         // 测试Myapi
-        let myapi = MyApi {
+        let myapi = Api {
             url: "https://movie.douban.com/j/subject_suggest".into(),
             token: None,
+            report: None,
         };
-        let data = get_data_by_my_api(myapi, "三体").await.unwrap();
+        let data = get_data_by_my_api(&myapi, "三体").await.unwrap();
         assert_eq!(data.id, data_origin.id);
     }
 }
