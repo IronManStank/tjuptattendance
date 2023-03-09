@@ -81,7 +81,7 @@ pub async fn get_data_by_douban_api(title: &str) -> Result<DouBanData, Error> {
 
     // 获取一遍 img_len
 
-    let Some(data) = doubandata_vec.into_iter().nth(0) else {
+    let Some(data) = doubandata_vec.into_iter().next() else {
         return Err(DouBanDataError::ApiTired.into());
     };
 
@@ -92,9 +92,18 @@ pub async fn get_data_by_douban_api(title: &str) -> Result<DouBanData, Error> {
 /// 从自定义API获取
 pub async fn get_data_by_my_api(api: MyApi, title: &str) -> Result<DouBanData, Error> {
     let client = get_client();
-    // client
+    let data_vec: Vec<DouBanData> = client
+        .get(&api.url)
+        .query(&[("q", title)])
+        .send()
+        .await?
+        .json()
+        .await?;
+    let Some(data) = data_vec.into_iter().next() else {
+        return Err(DouBanDataError::ApiTired.into());
+    };
 
-    todo!()
+    Ok(data)
 }
 
 lazy_static! {
@@ -114,11 +123,41 @@ lazy_static! {
 
 // 一个简单的客户端
 pub fn get_client() -> Client {
-    let client = ClientBuilder::new()
+    ClientBuilder::new()
         .timeout(std::time::Duration::from_secs(30))
         .redirect(reqwest::redirect::Policy::limited(5))
         .default_headers(HEADERS.clone())
         .build()
-        .unwrap_or_default();
-    client
+        .unwrap_or_default()
+}
+
+#[cfg(test)]
+mod test_douban_api {
+    use super::*;
+    use pretty_assertions::assert_str_eq;
+    use tokio;
+
+    #[tokio::test]
+    async fn test_get_data() {
+        let data_o = DouBanData {
+            id: "26647087".into(),
+            img_url: "https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2886492021.jpg"
+                .into(),
+            title: "三体".into(),
+            img_len: 17075,
+        };
+        let data = get_data_by_douban_api("三体").await.unwrap();
+        // DouBanData 实现了 Eq，所以不能直接比较，而是比较其 Debug 的字符
+        assert_str_eq!(format!("{:#?}", data_o), format!("{:#?}", data));
+        let data_1 = DouBanData {
+            id: "26647087".into(),
+            img_url: "https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2886492021.jpg"
+                .into(),
+            title: "三体".into(),
+            img_len: 0,
+        };
+        let data_1 = data_1.get_img_len(&get_client()).await.unwrap();
+
+        assert_str_eq!(format!("{:#?}", data_o), format!("{:#?}", data_1));
+    }
 }
