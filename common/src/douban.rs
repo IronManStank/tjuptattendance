@@ -70,7 +70,6 @@ impl std::ops::Deref for DataStore {
     }
 }
 
-
 #[derive(Debug, Serialize, Deserialize, Eq, Clone)]
 pub struct DouBanData {
     pub(crate) id: String,
@@ -270,7 +269,8 @@ mod test_douban_api {
         {
             let mut lock = store.lock().unwrap();
             lock.try_update_img().await;
-            assert!(lock.content().contains(&data_origin));
+            assert!(lock.contains(&data_origin));
+            assert!(lock.len() >= 2);
 
             // TODO 测试反馈功能
         }
