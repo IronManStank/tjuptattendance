@@ -1,5 +1,9 @@
-#[tokio::main]
-async fn main() -> Result<(), anyhow::Error> {
+fn main() {
     println!("Hello, world!");
-    Ok(())
+}
+
+#[cfg(test)]
+#[test]
+fn test_server() {
+    assert!(1 + 2 > 1);
 }

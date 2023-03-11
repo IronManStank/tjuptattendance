@@ -1,56 +1,9 @@
-[package]
-name = "tjuptop"
-version = "1.1.6"
-edition = "2021"
-description = "TJUPT 签到工具，支持TOP10签到"
-documentation = "https://github.com/azureqaq/tjuptattendance"
-homepage = "https://github.com/azureqaq/tjuptattendance"
-repository = "https://github.com/azureqaq/tjuptattendance"
-default-run = "tjuptop"
-readme = "README.md"
-authors = ["AzureQAQ <azureqaq@gmail.com>"]
-license = "MIT"
-keywords = ["cli", "bin"]
-categories = ["command-line-utilities"]
-build =  "build.rs"
-autotests = false
-
 [workspace]
 members = [
-    ".",
-    "common",
-    "server"
+    "tjuptop",
+    "server",
 ]
 
-
-[[bin]]
-name = "server"
-path = "./server/src/main.rs"
-
-[[test]]
-name = "integration"
-path = "tests/tests.rs"
-
-
-[dependencies]
-anyhow = "1.0"
-serde = { version = "1.0", features = ["derive"] }
-thiserror = "1.0"
-lazy_static = "1.4"
-async-trait = "0.1"
-common = { path = "./common" }
-
-[dependencies.chrono]
-version = "0.4"
-default-features = false
-features = ["clock", "std", "serde"]
-
-[dependencies.tokio]
-version = "1.26"
-default-features = false
-features = [
-    "rt-multi-thread", "macros", "parking_lot"
-]
 
 [profile.release]
 opt-level = "s"
@@ -58,11 +11,3 @@ lto = "fat"
 codegen-units = 1
 panic = "abort"
 strip = "symbols"
-
-[dev-dependencies]
-pretty_assertions = "1"
-tokio-test = "*"
-tempdir = "0.3"
-
-[build-dependencies]
-embed-resource =  "1"

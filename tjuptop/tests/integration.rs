@@ -1,6 +1,6 @@
 use pretty_assertions::assert_eq;
 
 #[test]
-fn add_test() {
-    assert_eq!(2 + 2, 4);
+fn test_add() {
+    assert_eq!(1 + 1, 2);
 }
