@@ -34,26 +34,31 @@ impl PartialEq for Answer {
 
 impl Answer {
     /// 唯一标识，是字符串的数字
+    #[inline]
     pub fn id(&self) -> &str {
         &self.id
     }
 
     /// 标题
+    #[inline]
     pub fn title(&self) -> &str {
         &self.title
     }
 
     /// 海报链接
+    #[inline]
     pub fn img_url(&self) -> &str {
         &self.img_url
     }
 
     /// 图片大小
+    #[inline]
     pub fn img_len(&self) -> u64 {
         self.img_len
     }
 
     /// 是否具有 img_len
+    #[inline]
     pub fn have_len(&self) -> bool {
         self.img_len > 0
     }
@@ -63,6 +68,10 @@ impl Answer {
     }
 
     /// 获取图片大小
+    ///
+    /// ## 注意：
+    /// - 此方法未检查是否 `hava_len` 只会强制覆盖 `img_len`
+    /// - 请调用前判断是否需要
     pub async fn get_len(&mut self) -> Result<(), Error> {
         let img_len = Self::get_content_length(&self.img_url)
             .await?
@@ -72,9 +81,17 @@ impl Answer {
     }
 }
 
+impl std::fmt::Display for Answer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", &self.title)
+    }
+}
+
 /// test Answer
 #[cfg(test)]
 mod test_answer {
+    use std::collections::HashSet;
+
     use super::*;
     use pretty_assertions::assert_eq;
 
@@ -95,5 +112,32 @@ mod test_answer {
 
         let img_len = Answer::get_content_length(url).await.unwrap();
         assert_eq!(img_len, Some(11584));
+    }
+
+    /// 测试 Answer Hash
+    #[test]
+    fn test_hash_answer() {
+        let url = "https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2886492021.webp";
+        let mut map = HashSet::new();
+        map.insert(Answer {
+            id: "26647087".into(),
+            img_url: url.into(),
+            title: "三体".into(),
+            img_len: 0,
+        });
+        map.insert(Answer {
+            id: "26647086".into(),
+            img_url: url.into(),
+            title: "三体".into(),
+            img_len: 0,
+        });
+        assert_eq!(map.len(), 2);
+        map.insert(Answer {
+            id: "26647087".into(),
+            img_url: "url.into()".into(),
+            title: "三体1".into(),
+            img_len: 1,
+        });
+        assert_eq!(map.len(), 2);
     }
 }

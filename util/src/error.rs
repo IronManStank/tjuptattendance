@@ -6,7 +6,6 @@ pub enum Error {
     // /// IO 错误
     // #[error(transparent)]
     // Io(#[from] std::io::Error),
-
     /// 网络错误
     #[error(transparent)]
     Web(#[from] reqwest::Error),
