@@ -72,12 +72,55 @@ impl Answer {
     /// ## 注意：
     /// - 此方法未检查是否 `hava_len` 只会强制覆盖 `img_len`
     /// - 请调用前判断是否需要
-    pub async fn get_len(&mut self) -> Result<(), Error> {
+    pub async fn set_len(&mut self) -> Result<(), Error> {
         let img_len = Self::get_content_length(&self.img_url)
             .await?
             .ok_or(Error::Answer(crate::error::AnswerError::ImgLenNotFund))?;
         self.img_len = img_len;
         Ok(())
+    }
+
+    /// 获取图片大小，并返回一个新的 Answer
+    ///
+    /// ## 注意：
+    /// - 此方法未检查是否 `hava_len` 只会强制覆盖 `img_len`
+    /// - 请调用前判断是否需要
+    pub async fn get_len(self) -> Result<Self, Error> {
+        Ok(Self {
+            img_len: self.ask_img_len().await?,
+            ..self
+        })
+    }
+
+    /// 获取图片大小，并返回一个新的 Answer
+    ///
+    /// ## 注意：
+    /// - 此方法未检查是否 `hava_len` 只会强制覆盖 `img_len`
+    /// - 请调用前判断是否需要
+    pub async fn get_len_try(self) -> Self {
+        if let Ok(Some(img_len)) = Self::get_content_length(&self.img_url).await {
+            Self { img_len, ..self }
+        } else {
+            self
+        }
+    }
+
+    /// 尝试获取图片大小
+    ///
+    /// ## 注意：
+    /// - 此方法未检查是否 `hava_len` 只会强制覆盖 `img_len`
+    /// - 请调用前判断是否需要
+    pub async fn set_len_try(&mut self) {
+        if let Ok(Some(img_len)) = Self::get_content_length(&self.img_url).await {
+            self.img_len = img_len;
+        }
+    }
+
+    /// 每次调用都会访问Web一次
+    pub async fn ask_img_len(&self) -> Result<u64, Error> {
+        Self::get_content_length(&self.img_url)
+            .await?
+            .ok_or(Error::Answer(crate::error::AnswerError::ImgLenNotFund))
     }
 }
 
@@ -98,7 +141,7 @@ mod test_answer {
     /// 测试获取图片大小
     #[tokio::test]
     async fn test_get_img_len() {
-        let url = "https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2886492021.webp";
+        let url = "https://img2.doubanio.com/view/photo/s_ratio_poster/public/p2886492021.jpg";
         let mut santi = Answer {
             id: "26647087".into(),
             img_url: url.into(),
@@ -106,12 +149,12 @@ mod test_answer {
             img_len: 0,
         };
 
-        santi.get_len().await.unwrap();
+        santi.set_len().await.unwrap();
 
-        assert_eq!(santi.img_len, 11584);
+        assert_eq!(santi.img_len, 17075);
 
         let img_len = Answer::get_content_length(url).await.unwrap();
-        assert_eq!(img_len, Some(11584));
+        assert_eq!(img_len, Some(17075));
     }
 
     /// 测试 Answer Hash

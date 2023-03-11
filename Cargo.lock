@@ -851,8 +851,11 @@ dependencies = [
  "anyhow",
  "embed-resource",
  "pretty_assertions",
+ "reqwest",
+ "serde",
  "thiserror",
  "tokio",
+ "util",
 ]
 
 [[package]]
