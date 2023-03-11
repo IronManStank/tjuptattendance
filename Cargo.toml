@@ -18,13 +18,14 @@ autotests = false
 [workspace]
 members = [
     ".",
-    "common"
+    "common",
+    "server"
 ]
 
 
-# [[bin]]
-# name = "server"
-# path = "./doubandataserver/src/main.rs"
+[[bin]]
+name = "server"
+path = "./server/src/main.rs"
 
 [[test]]
 name = "integration"
