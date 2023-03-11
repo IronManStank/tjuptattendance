@@ -2,6 +2,11 @@
 members = [
     "tjuptop",
     "server",
+    "util",
+]
+default-members = [
+    "tjuptop",
+    "server",
 ]
 
 
