@@ -27,12 +27,12 @@ pub struct User {
 }
 
 impl User {
-    /// cookie file name `name`_cookie.json
+    /// cookie file name "`name`_cookie.json"
     fn cookie_file_name(name: &str) -> String {
         format!("{}_cookie.json", name)
     }
 
-    /// 如果 `cookie_path` 设置为 `None` 则表示不会保存cookie
+    /// 如果 `cookie_dir` 设置为 `None` 则表示不会保存cookie
     pub fn new(name: String, pwd: String, cookie_dir: Option<PathBuf>) -> Self {
         Self {
             cookie_path: cookie_dir.map(|d| d.join(Self::cookie_file_name(&name))),

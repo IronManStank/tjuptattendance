@@ -6,13 +6,13 @@ use std::sync::Arc;
 
 /// 签到任务
 #[derive(Debug)]
-pub struct Task {
+pub struct Bot {
     pub(crate) user: Arc<User>,
     /// 目标时间点
     pub(crate) target: Option<NaiveDateTime>,
 }
 
-impl Task {
+impl Bot {
     /// 用户
     pub fn user(&self) -> &User {
         &self.user
