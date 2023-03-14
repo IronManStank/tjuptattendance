@@ -19,6 +19,10 @@ pub enum Error {
     #[error(transparent)]
     Api(#[from] ApiError),
 
+    /// cookies Error
+    #[error("cookies error")]
+    CookiesError,
+
     /// 其他任何错误
     #[error(transparent)]
     Other(#[from] anyhow::Error),
