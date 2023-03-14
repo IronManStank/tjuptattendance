@@ -11,6 +11,7 @@
 pub mod error;
 pub mod model;
 
+use chrono::prelude::*;
 use lazy_static::lazy_static;
 use reqwest::{header::HeaderMap, Client, ClientBuilder};
 
@@ -31,6 +32,9 @@ lazy_static! {
 
     /// 简单的 Client
     pub static ref CLIENT: Client = get_client();
+
+    /// 东八区 OFFSET
+    pub static ref OFFSET: FixedOffset = FixedOffset::east_opt(8*60*60).unwrap();
 }
 
 /// 获取一个简单client
@@ -41,4 +45,10 @@ pub fn get_client() -> Client {
         .redirect(reqwest::redirect::Policy::limited(5))
         .build()
         .unwrap_or_default()
+}
+
+/// 获取东八区时间
+#[inline]
+pub fn get_now() -> NaiveDateTime {
+    DateTime::<FixedOffset>::from_utc(Utc::now().naive_utc(), *OFFSET).naive_local()
 }

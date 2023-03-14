@@ -21,13 +21,15 @@ thiserror = "1.0"
 util = { path = "../util" }
 reqwest = { version = "0.11", features = ["json"]}
 serde = { version = "1", features = ["derive"]}
+chrono = { version = "0.4", default-features = false, features = ["std", "clock", "serde"] }
+reqwest_cookie_store = "0.5.0"
 
 
 [dependencies.tokio]
 version = "1"
 default-features = false
 features = [
-    "rt-multi-thread", "macros", "parking_lot"
+    "rt-multi-thread", "macros", "parking_lot", "time"
 ]
 
 [dev-dependencies]
