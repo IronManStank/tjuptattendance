@@ -2,12 +2,6 @@
 
 tjuptattendance 为 [TJUPT](https://www.tjupt.org) 的签到工具，支持 **TOP10** 签到
 
-
-
-# 目录
-
-[TOC]
-
 # 目标
 
 todo
