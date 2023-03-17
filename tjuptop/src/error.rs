@@ -13,7 +13,7 @@ pub enum Error {
 
     /// util error
     #[error(transparent)]
-    Answer(#[from] util::error::AnswerError),
+    Answer(#[from] util::error::DouBanDataError),
 
     /// Api Error
     #[error(transparent)]

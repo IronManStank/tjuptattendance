@@ -175,7 +175,7 @@ mod test_user_cookie {
         assert!(user_c.cookie_path().unwrap().is_file());
         // cookie 文件 内容存在
         let content = read_to_string(&cookie_path).unwrap();
-        // println!("{}\n\n{}", content, cookie_path.display());
+
         assert!(content.lines().count() >= 3);
         assert!(content.contains("bing."));
 

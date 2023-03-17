@@ -10,9 +10,9 @@ pub enum Error {
     #[error(transparent)]
     Web(#[from] reqwest::Error),
 
-    /// Answer 相关错误
+    /// DoubanData 相关错误
     #[error(transparent)]
-    Answer(#[from] AnswerError),
+    Data(#[from] DouBanDataError),
 
     /// 其他任何错误
     #[error(transparent)]
@@ -21,8 +21,12 @@ pub enum Error {
 
 /// Answer 相关错误
 #[derive(Debug, thiserror::Error)]
-pub enum AnswerError {
+pub enum DouBanDataError {
     /// 无法找到图片大小
     #[error("无法找到图片大小，可能是 API 服务器未设置 Content-Length")]
     ImgLenNotFund,
+
+    /// 图片格式错误
+    #[error("仅支持 Jpeg 格式")]
+    ImgFormatError,
 }

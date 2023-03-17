@@ -23,9 +23,43 @@
 //! ## 附加信息（快速判断）
 //! - 图片大小（需统一格式，目前豆瓣API默认值与TJUPT均为 `Jpeg` 格式，在浏览器中默认为 `WebP` 格式，应该可由 `Headers` 指定）
 
-use crate::{error::Error, CLIENT};
+use crate::{
+    error::{DouBanDataError, Error},
+    CLIENT,
+};
 use serde::{Deserialize, Serialize};
-use std::hash::Hash;
+use std::{hash::Hash, path::Path};
+
+/// 图片格式
+#[derive(Debug, Serialize, Deserialize, Default, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum ImgFormat {
+    /// 默认 Jpeg 仅支持 Jpeg
+    #[default]
+    Jpeg,
+    /// 其他任意格式
+    Other,
+}
+
+impl ImgFormat {
+    /// 检查链接指向
+    pub(crate) fn check_url(url: &str) -> Result<Self, Error> {
+        let url = reqwest::Url::parse(url).map_err(|_e| DouBanDataError::ImgFormatError)?;
+        let is_jpeg = url
+            .path_segments()
+            .and_then(|p| p.rev().next())
+            .and_then(|l| Path::new(l).extension())
+            .and_then(|p| p.to_str())
+            .map(|t| {
+                t.contains("jpeg") || t.contains("jpg") || t.contains("Jpeg") || t.contains("Jpg")
+            })
+            .unwrap_or(false);
+        if is_jpeg {
+            Ok(Self::Jpeg)
+        } else {
+            Ok(Self::Other)
+        }
+    }
+}
 
 /// 额外信息，用以快速判断是否为答案
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Copy)]
@@ -89,6 +123,12 @@ impl DouBanData {
         &self.img_url
     }
 
+    /// 检查豆瓣链接格式
+    pub fn check_img_format(&self) -> Result<bool, Error> {
+        let check_res = ImgFormat::check_url(&self.img_url)?;
+        Ok(matches!(check_res, ImgFormat::Jpeg))
+    }
+
     /// 图片大小
     ///
     /// 如果为 0 则未设置
@@ -101,13 +141,16 @@ impl DouBanData {
 
     /// 是否具有 额外信息
     #[inline]
-    pub fn have_more_info(&self) -> bool {
+    pub fn have_additional_info(&self) -> bool {
         // 如果是豆瓣API
         self.additional_info
             .map(|info| info.is_set())
             .unwrap_or(false)
     }
 
+    /// 获取 内容大小
+    ///
+    /// 如果未设置 Content-Length 则为 `None`
     async fn get_content_length(url: &str) -> Result<Option<u64>, Error> {
         Ok(CLIENT.get(url).send().await?.content_length())
     }
@@ -120,7 +163,7 @@ impl DouBanData {
     pub async fn set_len(&mut self) -> Result<(), Error> {
         let img_len = Self::get_content_length(&self.img_url)
             .await?
-            .ok_or(Error::Answer(crate::error::AnswerError::ImgLenNotFund))?;
+            .ok_or(Error::Data(crate::error::DouBanDataError::ImgLenNotFund))?;
         self.additional_info = Some(AdditionalInfo { img_len });
         Ok(())
     }
@@ -166,11 +209,11 @@ impl DouBanData {
         }
     }
 
-    /// 每次调用都会访问Web一次
+    /// 谨慎使用：每次调用都会访问 Web 一次
     pub async fn ask_img_len(&self) -> Result<u64, Error> {
         Self::get_content_length(&self.img_url)
             .await?
-            .ok_or(Error::Answer(crate::error::AnswerError::ImgLenNotFund))
+            .ok_or(Error::Data(crate::error::DouBanDataError::ImgLenNotFund))
     }
 }
 
@@ -180,7 +223,7 @@ impl std::fmt::Display for DouBanData {
     }
 }
 
-/// test Answer
+/// 测试豆瓣数据
 #[cfg(test)]
 mod test_answer {
     use std::collections::HashSet;
@@ -232,5 +275,21 @@ mod test_answer {
             additional_info: Some(AdditionalInfo { img_len: 1 }),
         });
         assert_eq!(map.len(), 2);
+    }
+
+    /// 测试：通过链接判断是否为 `Jpeg`
+    #[test]
+    fn test_imgformat_by_url() {
+        let url = "https://dioubad.com/img/213.jpg";
+        assert_eq!(ImgFormat::Jpeg, ImgFormat::check_url(url).unwrap());
+
+        let url = "https://dioubad.com/img/213.jpeg";
+        assert_eq!(ImgFormat::Jpeg, ImgFormat::check_url(url).unwrap());
+
+        let url = "https://dioubad.com/img/213.Jpeg";
+        assert_eq!(ImgFormat::Jpeg, ImgFormat::check_url(url).unwrap());
+
+        let url = "https://dioubad.com/img/213.Jpg";
+        assert_eq!(ImgFormat::Jpeg, ImgFormat::check_url(url).unwrap());
     }
 }
