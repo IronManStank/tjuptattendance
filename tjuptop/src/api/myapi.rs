@@ -4,7 +4,7 @@ use std::hash::Hash;
 
 use crate::error::{ApiError, Error};
 use serde::{Deserialize, Serialize};
-use util::{model::Answer, CLIENT};
+use util::{model::doubandata::DouBanData, CLIENT};
 
 /// 自定义API
 #[derive(Debug, Serialize, Deserialize, Eq, Clone)]
@@ -15,8 +15,8 @@ pub struct MyApi {
 
 impl MyApi {
     /// 获取一个豆瓣数据
-    pub async fn get_answer(&self, title: &str) -> Result<Answer, Error> {
-        let an_lst: Vec<Answer> = CLIENT
+    pub async fn get_answer(&self, title: &str) -> Result<DouBanData, Error> {
+        let an_lst: Vec<DouBanData> = CLIENT
             .get(&self.url)
             .query(&[("q", Some(title)), ("t", self.token.as_deref())])
             .send()
