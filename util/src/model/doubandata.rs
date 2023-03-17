@@ -71,6 +71,11 @@ pub struct AdditionalInfo {
 }
 
 impl AdditionalInfo {
+    /// new
+    pub fn new(img_len: u64) -> Self {
+        Self { img_len }
+    }
+
     /// 是否设置了 additional info
     pub fn is_set(&self) -> bool {
         self.img_len > 0
@@ -291,5 +296,13 @@ mod test_answer {
 
         let url = "https://dioubad.com/img/213.Jpg";
         assert_eq!(ImgFormat::Jpeg, ImgFormat::check_url(url).unwrap());
+
+        let data = DouBanData {
+            id: "26647087".into(),
+            img_url: "https://dioubad.com/img/213.webp".into(),
+            title: "三体".into(),
+            additional_info: None,
+        };
+        assert!(data.check_img_format().unwrap() == false);
     }
 }
