@@ -2,6 +2,8 @@
 
 # 正在施工中...
 
+tjuptattendance 目前仅处于非常早期的 **重构** 阶段，欢迎 Issue 或者 PR
+
 - 开发日志请查看：[CHANGELOG](./CHANGELOG.md)
 - 开发者文档请查看：[DEVELOPERS](./DEVELOPERS.md)
 
