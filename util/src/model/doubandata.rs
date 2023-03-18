@@ -41,7 +41,7 @@ pub(crate) enum ImgFormat {
 }
 
 impl ImgFormat {
-    /// 检查链接指向
+    /// 检查链接指向的图片格式
     pub(crate) fn check_url(url: &str) -> Result<Self, Error> {
         let url = reqwest::Url::parse(url).map_err(|_e| DouBanDataError::ImgFormatError)?;
         let is_jpeg = url
