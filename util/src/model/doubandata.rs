@@ -28,7 +28,9 @@ use crate::{
     CLIENT,
 };
 use serde::{Deserialize, Serialize};
-use std::{hash::Hash, path::Path};
+use std::{hash::Hash, path::Path, sync::Arc};
+
+use super::poster::Poster;
 
 /// 图片格式
 #[derive(Debug, Serialize, Deserialize, Default, Clone, Copy, PartialEq, Eq)]
@@ -109,6 +111,34 @@ impl PartialEq for DouBanData {
 }
 
 impl DouBanData {
+    /// new
+    pub fn new(
+        id: String,
+        title: String,
+        img_url: String,
+        additional_info: Option<AdditionalInfo>,
+    ) -> Self {
+        Self {
+            id,
+            title,
+            img_url,
+            additional_info,
+        }
+    }
+
+    /// 判断是否为答案
+    pub async fn is_answer(&self, poster: Arc<Poster>) -> Result<bool, Error> {
+        if self.have_additional_info() & poster.is_quick_check() {
+            Ok(self.img_len().abs_diff(poster.img_len()) == 6)
+        } else {
+            let _img_len = self
+                .ask_img_len()
+                .await
+                .map_err(|_e| DouBanDataError::ImgLenNotFund)?;
+            todo!()
+        }
+    }
+
     /// 唯一标识，是数字的字符串
     /// eg. `"26647087"`
     #[inline]

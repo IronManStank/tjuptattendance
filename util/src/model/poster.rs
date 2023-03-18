@@ -24,6 +24,13 @@ impl Poster {
             .unwrap_or(false)
     }
 
+    /// 图片大小
+    pub fn img_len(&self) -> u64 {
+        self.additional_info
+            .map(|info| info.img_len)
+            .unwrap_or_default()
+    }
+
     /// 创建一个 Poster
     pub fn new(
         url: String,

@@ -29,4 +29,8 @@ pub enum DouBanDataError {
     /// 图片格式错误
     #[error("仅支持 Jpeg 格式")]
     ImgFormatError,
+
+    /// 无法快速检查答案
+    #[error("无足够信息来快速匹配")]
+    InfoNotEnoughError,
 }
