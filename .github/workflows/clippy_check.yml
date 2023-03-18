@@ -1,0 +1,31 @@
+name: Clippy & fmt Check
+on:
+  pull_request:
+  push:
+    branches:
+    - master
+
+
+jobs:
+  clippy_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: rustup component add clippy
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.CLIPPY }}
+          args: '--all --all-features'
+
+  rustfmt:
+    name: rust fmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          components: rustfmt
+      - name: Check formatting
+        run: cargo fmt --all --check
+
