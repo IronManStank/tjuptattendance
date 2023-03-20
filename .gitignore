@@ -1,6 +1,6 @@
 # Rust cache
 /target
-Cargo.lock
+# Cargo.lock
 
 # local file(s)
 *_local*
