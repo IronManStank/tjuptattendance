@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.7] - 2023-03-20
+### Fixed
+- Release 中的 Linux 可用
+
 ## [1.1.6] - 2023-01-12
 ### Fixed
 - 修复严重BUG，请不要使用 `1.1.5` 版本，此BUG导致获取答案错误，会提交错误的答案
