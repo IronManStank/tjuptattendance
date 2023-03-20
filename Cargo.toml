@@ -29,7 +29,7 @@ serde = {version = "1.0.145", features = ["derive"] }
 toml = "0.7.0"
 ahash = { version = "0.8.0", features = ["std", "serde"] }
 lazy_static = "1.4.0"
-reqwest = { version = "0.11.12", features = ["cookies", "json"] }
+reqwest = { version = "0.11.12", default-features = false, features = ["cookies", "json", "rustls-tls"] }
 reqwest_cookie_store = "0.5.0"
 platform-dirs = "0.3.0"
 scraper = "0.15.0"
